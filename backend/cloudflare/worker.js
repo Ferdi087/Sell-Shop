@@ -282,8 +282,18 @@ async function resolveDownloadTarget(env, fileKey) {
     throw new Error(`No files found for prefix: ${prefix}`);
   }
 
-  const exeFile = files.find((f) => /\.exe$/i.test(f.fileName));
-  return exeFile ? exeFile.fileName : files[0].fileName;
+  const cleanFiles = files.filter((f) => {
+    const lower = f.fileName.toLowerCase();
+    // Exclude folder markers and metadata files that are not meaningful downloads.
+    return !lower.endsWith(".bzempty") && !lower.endsWith("info.md");
+  });
+
+  if (!cleanFiles.length) {
+    throw new Error(`No downloadable files found for prefix: ${prefix}`);
+  }
+
+  const preferred = cleanFiles.find((f) => /\.(exe|zip|7z|rar|msi)$/i.test(f.fileName));
+  return preferred ? preferred.fileName : cleanFiles[0].fileName;
 }
 
 async function getDownloadUrl(env, fileName) {

@@ -35,8 +35,8 @@ export default function RedeemSection() {
           
           setTimeout(() => {
             setMessage("Download startet...");
-            // Download starten
-            window.open(downloadUrl, "_blank");
+            // Download im gleichen Tab starten, damit kein leerer neuer Tab offen bleibt.
+            window.location.href = downloadUrl;
           }, 1000);
         } catch (dlErr) {
           console.error("Download-Fehler:", dlErr);
