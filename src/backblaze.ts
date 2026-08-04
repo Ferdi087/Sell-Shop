@@ -1,6 +1,7 @@
 // Browser ruft nur den eigenen Proxy/Backend-Endpunkt auf.
 // Direkte B2-Auth aus GitHub Pages scheitert an CORS.
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(/\/$/, "");
+const DEFAULT_API_BASE_URL = "https://sell-shop-api.ferdinandurbach4.workers.dev";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/$/, "");
 
 // Parsed info from info.md
 export interface ToolInfo {
