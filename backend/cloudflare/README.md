@@ -44,12 +44,16 @@ Danach bekommst du eine URL wie:
 
 - `https://sell-shop-api.<name>.workers.dev`
 
+Aktuell deployed URL in diesem Projekt:
+
+- `https://sell-shop-api.ferdinandurbach4.workers.dev`
+
 ## 5) Frontend konfigurieren
 
 Im Projekt-Root eine `.env` anlegen:
 
 ```env
-VITE_API_BASE_URL=https://sell-shop-api.<name>.workers.dev
+VITE_API_BASE_URL=https://sell-shop-api.ferdinandurbach4.workers.dev
 ```
 
 Dann neu bauen/deployen:
@@ -63,3 +67,14 @@ npm run build
 - `GET /tools`
 - `GET /games`
 - `GET /download-url?fileName=v/tool/tool.exe`
+
+## 7) Produktions-Secrets setzen
+
+Diese zwei Secrets muessen im Worker gesetzt werden, damit Backblaze funktioniert:
+
+```bash
+npx wrangler secret put B2_KEY_ID --config backend/cloudflare/wrangler.toml
+npx wrangler secret put B2_APP_KEY --config backend/cloudflare/wrangler.toml
+```
+
+Hinweis: Wrangler fragt den Wert interaktiv im Terminal ab.

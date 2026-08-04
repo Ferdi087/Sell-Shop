@@ -4,6 +4,7 @@ let authCache = {
   token: "",
   apiUrl: "",
   downloadUrl: "",
+  accountId: "",
   bucketId: "",
   bucketName: "",
   expiresAt: 0,
@@ -50,16 +51,66 @@ async function authorizeB2(env) {
   }
 
   const data = await resp.json();
+  let bucketId = env.B2_BUCKET_ID || data.allowed.bucketId || "";
+  let bucketName = env.B2_BUCKET_NAME || data.allowed.bucketName || "";
+
+  if (!bucketId || !bucketName) {
+    const bucketInfo = await resolveBucket(env, {
+      authorizationToken: data.authorizationToken,
+      apiUrl: data.apiUrl,
+      accountId: data.accountId,
+      preferredBucketName: env.B2_BUCKET_NAME || "",
+    });
+    bucketId = bucketInfo.bucketId;
+    bucketName = bucketInfo.bucketName;
+  }
+
   authCache = {
     token: data.authorizationToken,
     apiUrl: data.apiUrl,
     downloadUrl: data.downloadUrl,
-    bucketId: env.B2_BUCKET_ID || data.allowed.bucketId,
-    bucketName: env.B2_BUCKET_NAME || data.allowed.bucketName,
+    accountId: data.accountId,
+    bucketId,
+    bucketName,
     expiresAt: Date.now() + TOKEN_TTL_SECONDS * 1000,
   };
 
   return authCache;
+}
+
+async function resolveBucket(env, auth) {
+  const body = {
+    accountId: auth.accountId,
+  };
+
+  if (auth.preferredBucketName) {
+    body.bucketName = auth.preferredBucketName;
+  }
+
+  const resp = await fetch(`${auth.apiUrl}/b2api/v2/b2_list_buckets`, {
+    method: "POST",
+    headers: {
+      Authorization: auth.authorizationToken,
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!resp.ok) {
+    throw new Error(`B2 list buckets failed (${resp.status})`);
+  }
+
+  const data = await resp.json();
+  const buckets = data.buckets || [];
+  if (!buckets.length) {
+    throw new Error("No Backblaze buckets available for this key.");
+  }
+
+  const bucket = buckets[0];
+  return {
+    bucketId: bucket.bucketId,
+    bucketName: bucket.bucketName,
+  };
 }
 
 async function listFilesByPrefix(env, prefix) {
