@@ -270,7 +270,24 @@ async function getGames(env) {
   return games;
 }
 
+async function resolveDownloadTarget(env, fileKey) {
+  // If file key already looks like a concrete file, keep it.
+  if (/\.[^/]+$/i.test(fileKey)) {
+    return fileKey;
+  }
+
+  const prefix = fileKey.endsWith("/") ? fileKey : `${fileKey}/`;
+  const files = await listFilesByPrefix(env, prefix);
+  if (!files.length) {
+    throw new Error(`No files found for prefix: ${prefix}`);
+  }
+
+  const exeFile = files.find((f) => /\.exe$/i.test(f.fileName));
+  return exeFile ? exeFile.fileName : files[0].fileName;
+}
+
 async function getDownloadUrl(env, fileName) {
+  const resolvedFileName = await resolveDownloadTarget(env, fileName);
   const auth = await authorizeB2(env);
 
   const tokenResp = await fetch(`${auth.apiUrl}/b2api/v2/b2_get_download_authorization`, {
@@ -281,7 +298,7 @@ async function getDownloadUrl(env, fileName) {
     },
     body: JSON.stringify({
       bucketId: auth.bucketId,
-      fileNamePrefix: fileName,
+      fileNamePrefix: resolvedFileName,
       validDurationInSeconds: 60,
     }),
   });
@@ -291,7 +308,7 @@ async function getDownloadUrl(env, fileName) {
   }
 
   const tokenData = await tokenResp.json();
-  const encodedName = encodeURIComponent(fileName).replace(/%2F/g, "/");
+  const encodedName = encodeURIComponent(resolvedFileName).replace(/%2F/g, "/");
   return `${auth.downloadUrl}/file/${auth.bucketName}/${encodedName}?Authorization=${encodeURIComponent(tokenData.authorizationToken)}`;
 }
 

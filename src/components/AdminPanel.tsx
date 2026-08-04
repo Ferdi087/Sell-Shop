@@ -44,12 +44,14 @@ export default function AdminPanel() {
     setLoadingFiles(true);
     try {
       const [tools, games] = await Promise.all([loadTools(), loadGames()]);
-      
+
+      const downloadableTools = tools.filter((t: ToolInfo) => Boolean(t.exeFile));
+
       const options: FileOption[] = [
-        ...tools.map((t: ToolInfo) => ({
+        ...downloadableTools.map((t: ToolInfo) => ({
           id: t.id,
           name: `[Tool] ${t.name}`,
-          path: t.exeFile || t.folder,
+          path: t.exeFile!,
         })),
         ...games.map((g: GameInfo) => ({
           id: g.id,
