@@ -30,7 +30,12 @@ export default function App() {
       setGames(gamesData);
     } catch (err) {
       console.error("Fehler beim Laden:", err);
-      setError("Fehler beim Laden der Daten. Bitte später erneut versuchen.");
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("VITE_API_BASE_URL")) {
+        setError("Backend nicht konfiguriert. Setze VITE_API_BASE_URL auf deinen API-Proxy.");
+      } else {
+        setError("Fehler beim Laden der Daten. Bitte später erneut versuchen.");
+      }
     }
     setLoading(false);
   };

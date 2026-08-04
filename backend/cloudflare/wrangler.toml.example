@@ -1,0 +1,13 @@
+name = "sell-shop-api"
+main = "worker.js"
+compatibility_date = "2026-08-04"
+
+[vars]
+ALLOWED_ORIGIN = "https://ferdi087.github.io"
+# Optional wenn der Key nur auf einen Bucket begrenzt ist:
+# B2_BUCKET_ID = "your_bucket_id"
+# B2_BUCKET_NAME = "your_bucket_name"
+
+# Secrets (per CLI setzen):
+# wrangler secret put B2_KEY_ID
+# wrangler secret put B2_APP_KEY
