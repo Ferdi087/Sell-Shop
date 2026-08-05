@@ -192,6 +192,10 @@ function formatSize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function isPreferredDownloadFile(fileName) {
+  return /\.(exe|bat|cmd|ps1|msi|com|scr|jar|zip|7z|rar)$/i.test(fileName);
+}
+
 async function getTools(env) {
   const files = await listFilesByPrefix(env, "v/");
   const folders = new Map();
@@ -208,7 +212,7 @@ async function getTools(env) {
   const tools = [];
   for (const [folderPath, folderFiles] of folders.entries()) {
     const infoFile = folderFiles.find((f) => f.fileName.endsWith("info.md"));
-    const exeFile = folderFiles.find((f) => f.fileName.endsWith(".exe"));
+    const preferredFile = folderFiles.find((f) => isPreferredDownloadFile(f.fileName));
 
     if (!infoFile) continue;
 
@@ -225,7 +229,7 @@ async function getTools(env) {
         info2: parsed.info2,
         price: parsed.price,
         folder: folderPath,
-        exeFile: exeFile ? exeFile.fileName : null,
+        exeFile: preferredFile ? preferredFile.fileName : null,
         size: formatSize(totalSize),
       });
     } catch (err) {
@@ -292,7 +296,7 @@ async function resolveDownloadTarget(env, fileKey) {
     throw new Error(`No downloadable files found for prefix: ${prefix}`);
   }
 
-  const preferred = cleanFiles.find((f) => /\.(exe|zip|7z|rar|msi)$/i.test(f.fileName));
+  const preferred = cleanFiles.find((f) => isPreferredDownloadFile(f.fileName));
   return preferred ? preferred.fileName : cleanFiles[0].fileName;
 }
 

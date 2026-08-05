@@ -38,13 +38,11 @@ export default function AdminPanel({ tools = [], games = [] }: AdminPanelProps) 
   const [loadingFiles, setLoadingFiles] = useState(false);
 
   const buildFileOptions = (toolList: ToolInfo[], gameList: GameInfo[]): FileOption[] => {
-    const downloadableTools = toolList.filter((t: ToolInfo) => Boolean(t.exeFile));
-
     return [
-      ...downloadableTools.map((t: ToolInfo) => ({
+      ...toolList.map((t: ToolInfo) => ({
         id: `tool-${t.id}`,
         name: `[Tool] ${t.name}`,
-        path: t.exeFile!,
+        path: t.exeFile || t.folder,
       })),
       ...gameList.map((g: GameInfo) => ({
         id: `game-${g.id}`,
