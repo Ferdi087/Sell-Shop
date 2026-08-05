@@ -19,7 +19,12 @@ import { loadTools, loadGames, type ToolInfo, type GameInfo } from "../backblaze
 
 type FileOption = { id: string; name: string; path: string };
 
-export default function AdminPanel() {
+type AdminPanelProps = {
+  tools?: ToolInfo[];
+  games?: GameInfo[];
+};
+
+export default function AdminPanel({ tools = [], games = [] }: AdminPanelProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [adminInput, setAdminInput] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -32,33 +37,44 @@ export default function AdminPanel() {
   const [fileOptions, setFileOptions] = useState<FileOption[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
 
+  const buildFileOptions = (toolList: ToolInfo[], gameList: GameInfo[]): FileOption[] => {
+    const downloadableTools = toolList.filter((t: ToolInfo) => Boolean(t.exeFile));
+
+    return [
+      ...downloadableTools.map((t: ToolInfo) => ({
+        id: `tool-${t.id}`,
+        name: `[Tool] ${t.name}`,
+        path: t.exeFile!,
+      })),
+      ...gameList.map((g: GameInfo) => ({
+        id: `game-${g.id}`,
+        name: `[Spiel] ${g.name}`,
+        path: g.fileName,
+      })),
+    ];
+  };
+
   // Codes und Dateien laden wenn Admin
   useEffect(() => {
     if (isAdmin) {
       loadCodes();
-      loadFileOptions();
+      if (tools.length > 0 || games.length > 0) {
+        const options = buildFileOptions(tools, games);
+        setFileOptions(options);
+        if (options.length > 0 && !selectedFile) {
+          setSelectedFile(options[0].path);
+        }
+      } else {
+        loadFileOptions();
+      }
     }
-  }, [isAdmin]);
+  }, [isAdmin, tools, games, selectedFile]);
 
   const loadFileOptions = async () => {
     setLoadingFiles(true);
     try {
-      const [tools, games] = await Promise.all([loadTools(), loadGames()]);
-
-      const downloadableTools = tools.filter((t: ToolInfo) => Boolean(t.exeFile));
-
-      const options: FileOption[] = [
-        ...downloadableTools.map((t: ToolInfo) => ({
-          id: t.id,
-          name: `[Tool] ${t.name}`,
-          path: t.exeFile!,
-        })),
-        ...games.map((g: GameInfo) => ({
-          id: g.id,
-          name: `[Spiel] ${g.name}`,
-          path: g.fileName,
-        })),
-      ];
+      const [fetchedTools, fetchedGames] = await Promise.all([loadTools(), loadGames()]);
+      const options = buildFileOptions(fetchedTools, fetchedGames);
       
       setFileOptions(options);
       if (options.length > 0 && !selectedFile) {

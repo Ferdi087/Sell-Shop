@@ -207,7 +207,7 @@ export default function App() {
       <footer className="px-5 sm:px-10 lg:px-16 py-6 sm:py-8 mt-6">
         <div className="max-w-3xl">
           {/* Admin Panel */}
-          <AdminPanel />
+          <AdminPanel tools={tools} games={games} />
 
           {/* Copyright */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pt-6 border-t border-neutral-100 mt-4">

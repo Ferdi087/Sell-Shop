@@ -41,8 +41,8 @@ export async function checkCode(inputCode: string): Promise<string | null> {
   
   for (const [_id, data] of Object.entries(codes)) {
     if (data.code.toUpperCase() === upperInput) {
-      // Optional: Code nach Einlösung löschen
-      // await remove(ref(database, `codes/${_id}`));
+      // Einmal-Code: nach erfolgreicher Einlösung sofort löschen.
+      await remove(ref(database, `codes/${_id}`));
       return data.fileKey;
     }
   }
