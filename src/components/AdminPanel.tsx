@@ -104,6 +104,11 @@ export default function AdminPanel({ tools = [], games = [] }: AdminPanelProps) 
     }
   };
 
+  const handleAdminSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleAdminLogin();
+  };
+
   const handleGenerateCode = async () => {
     if (!selectedFile) return;
     setGenerating(true);
@@ -179,25 +184,24 @@ export default function AdminPanel({ tools = [], games = [] }: AdminPanelProps) 
               <p className="text-xs text-neutral-400 mb-3">
                 Admin-Code eingeben:
               </p>
-              <div className="flex gap-2">
+              <form onSubmit={handleAdminSubmit} className="flex gap-2">
                 <input
                   type="password"
                   value={adminInput}
                   onChange={(e) => setAdminInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()}
                   placeholder="••••••••"
                   className="flex-1 bg-white border border-neutral-200 text-neutral-900
                     px-3 py-2 text-sm font-mono placeholder:text-neutral-300
                     focus:outline-none focus:border-neutral-400 transition-colors rounded-md"
                 />
                 <button
-                  onClick={handleAdminLogin}
+                  type="submit"
                   className="bg-neutral-900 text-white px-4 py-2 text-sm font-sans
                     font-medium hover:bg-neutral-800 transition-colors cursor-pointer rounded-md"
                 >
                   Login
                 </button>
-              </div>
+              </form>
             </div>
           ) : (
             /* Admin Dashboard */
